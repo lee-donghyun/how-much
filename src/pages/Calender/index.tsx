@@ -160,7 +160,6 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
     >
       <Form
         layout="horizontal"
-        size="large"
         form={form}
         onFinish={(form) => {
           console.log(form);
@@ -182,7 +181,7 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
           name="value"
           rules={[{ required: true, message: "반드시 입력해주세요." }]}
         >
-          <Input inputMode="numeric" />
+          <Input inputMode="numeric" addonAfter="원" />
         </Form.Item>
         <Form.Item
           label="메모"
