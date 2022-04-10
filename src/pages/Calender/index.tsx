@@ -141,9 +141,9 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
     }
     if (visible) {
       const body = document.body;
-      enableBodyScroll(body);
+      disableBodyScroll(body);
       return () => {
-        disableBodyScroll(body);
+        enableBodyScroll(body);
       };
     }
   }, [visible]);
@@ -159,7 +159,6 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
       onCancel={onClose}
     >
       <Form
-        size="small"
         layout="horizontal"
         form={form}
         onFinish={(form) => {
@@ -183,7 +182,7 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
           name="value"
           rules={[{ required: true, message: "반드시 입력해주세요." }]}
         >
-          <Input />
+          <Input inputMode="numeric" />
         </Form.Item>
         <Form.Item
           label="메모"
