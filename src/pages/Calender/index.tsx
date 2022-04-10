@@ -15,6 +15,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import Record from "../../components/Record";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { enableBodyScroll, disableBodyScroll } from "body-scroll-lock";
 
 const CalenderPage = () => {
   const [date, setDate] = useState(dayjs());
@@ -80,7 +81,13 @@ const CalenderPage = () => {
         onSelect={onSelect}
       />
       <Divider />
-      <div style={{ padding: 20, paddingBottom: 80 }} ref={listRef}>
+      <div
+        style={{
+          padding: 20,
+          paddingBottom: "calc(env(safe-area-inset-bottom)+80px)",
+        }}
+        ref={listRef}
+      >
         <List
           itemLayout="horizontal"
           dataSource={[1, 2, 3, 4, 5]}
@@ -131,6 +138,13 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
   useEffect(() => {
     if (!visible && form) {
       form.resetFields();
+    }
+    if (visible) {
+      const body = document.body;
+      enableBodyScroll(body);
+      return () => {
+        disableBodyScroll(body);
+      };
     }
   }, [visible]);
   return (
