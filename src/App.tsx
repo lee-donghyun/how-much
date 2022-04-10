@@ -1,8 +1,14 @@
+import { Route, Routes } from "react-router-dom";
+import Navigation from "./components/Navigation";
+import CalenderPage from "./pages/Calender";
+
 function App() {
   return (
-    <div className="App">
-      <h1>How Much ?</h1>
-    </div>
+    <Routes>
+      <Route element={<Navigation />}>
+        <Route index element={<CalenderPage />} />
+      </Route>
+    </Routes>
   );
 }
 
