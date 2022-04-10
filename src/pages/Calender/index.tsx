@@ -51,10 +51,9 @@ const CalenderPage = () => {
     );
   };
 
-  console.log(date.format("YYYY-MM-DD"));
-
   return (
     <div>
+      <div style={{ height: 72 }}></div>
       <div className="top-navigation">
         <label style={{ margin: 0 }}>
           <input

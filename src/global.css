@@ -28,8 +28,10 @@ div.bottom-navigation p {
 
 div.top-navigation {
   padding: 20px 8px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -42,6 +44,7 @@ div.top-navigation {
 div.top-navigation input[type="month"] {
   border: 0;
   font-size: 16px;
+  background-color: white;
 }
 
 .ant-switch.record-type[aria-checked="false"] {
