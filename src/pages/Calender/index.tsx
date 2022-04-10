@@ -160,6 +160,7 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
     >
       <Form
         layout="horizontal"
+        size="large"
         form={form}
         onFinish={(form) => {
           console.log(form);
@@ -172,7 +173,6 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
         <Form.Item label="종류" name="type">
           <Switch
             className="record-type"
-            size="default"
             checkedChildren="수입"
             unCheckedChildren="지출"
           />
