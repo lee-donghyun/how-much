@@ -117,39 +117,6 @@ const CalenderPage = () => {
             </List.Item>
           )}
         />
-        <Form
-          layout="horizontal"
-          onFinish={(form) => {
-            console.log(form);
-          }}
-          initialValues={{
-            type: false,
-          }}
-          requiredMark={false}
-        >
-          <Form.Item label="종류" name="type">
-            <Switch
-              className="record-type"
-              size="default"
-              checkedChildren="수입"
-              unCheckedChildren="지출"
-            />
-          </Form.Item>
-          <Form.Item
-            label="금액"
-            name="value"
-            rules={[{ required: true, message: "반드시 입력해주세요." }]}
-          >
-            <Input inputMode="numeric" />
-          </Form.Item>
-          <Form.Item
-            label="메모"
-            name="memo"
-            rules={[{ required: true, message: "반드시 입력해주세요." }]}
-          >
-            <Input.TextArea />
-          </Form.Item>
-        </Form>
       </div>
       <RecordModal
         visible={modal}
