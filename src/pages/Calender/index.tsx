@@ -8,22 +8,25 @@ import {
   Input,
   List,
   message,
-  Modal,
-  Popconfirm,
   Switch,
   Typography,
 } from "antd";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import dayjs from "dayjs";
 import Record from "../../components/Record";
-import { DeleteOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
-import { enableBodyScroll, disableBodyScroll } from "body-scroll-lock";
-import db from "../../services/api/db";
+import { DownOutlined, PlusOutlined } from "@ant-design/icons";
+import db, { Record as IRecord } from "../../services/api/db";
 import { useLiveQuery } from "dexie-react-hooks";
+import BottomSheet from "../../components/BottomSheet";
+import useLongTouch from "../../services/hooks/useLongClick";
+import { BottomSheetState } from "./helper";
 
 const CalenderPage = () => {
   const [date, setDate] = useState(dayjs());
-  const [modal, setModal] = useState(false);
+  const [bottomSheet, setBottomSheet] = useState<BottomSheetState>(
+    BottomSheetState.NONE
+  );
+  const [target, setTarget] = useState<null | IRecord>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const records = useLiveQuery(
@@ -36,6 +39,22 @@ const CalenderPage = () => {
         )
         .toArray(),
     [date]
+  );
+
+  const onLongTouch = useLongTouch<HTMLDivElement>(
+    async (_, record: IRecord) => {
+      if (window.confirm(`${record.description}을(를) 삭제할까요?`)) {
+        try {
+          if (!record.id) {
+            throw new Error("");
+          }
+          await db.records.delete(record.id);
+        } catch (error) {
+          message.error("다시 시도해주세요.");
+          console.error(error);
+        }
+      }
+    }
   );
 
   const onSelect = (date: dayjs.Dayjs) => {
@@ -75,7 +94,7 @@ const CalenderPage = () => {
         <Button
           type="primary"
           onClick={() => {
-            setModal(true);
+            setBottomSheet(BottomSheetState.ADD);
           }}
         >
           <PlusOutlined />
@@ -100,7 +119,7 @@ const CalenderPage = () => {
       </Typography.Title>
       <div
         style={{
-          padding: 20,
+          paddingTop: 20,
           paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)",
         }}
         ref={listRef}
@@ -114,46 +133,24 @@ const CalenderPage = () => {
           }
           rowKey={(record) => record.id ?? ""}
           renderItem={(record) => (
-            <List.Item>
+            <List.Item
+              className="record"
+              onTouchStart={onLongTouch.onTouchStart}
+              onTouchEnd={(e) => onLongTouch.onTouchEnd(e, record)}
+            >
               <Record
                 mode={record.type}
                 title={`${record.value.toLocaleString()}원`}
                 description={record.description}
               />
-              <Popconfirm
-                title={`${record.description}을 삭제할까요?`}
-                placement="left"
-                okText="삭제"
-                okButtonProps={{
-                  danger: true,
-                }}
-                cancelText="취소"
-                onConfirm={async () => {
-                  try {
-                    if (!record.id) {
-                      throw new Error("");
-                    }
-                    await db.records.delete(record.id);
-                  } catch (error) {
-                    message.error("다시 시도해주세요.");
-                    console.error(error);
-                  }
-                }}
-              >
-                <div role={"button"}>
-                  <DeleteOutlined
-                    style={{ fontSize: "16px", color: "#e1e1e1" }}
-                  />
-                </div>
-              </Popconfirm>
             </List.Item>
           )}
         />
       </div>
-      <RecordModal
-        visible={modal}
+      <RecordBottomSheet
+        open={bottomSheet == BottomSheetState.ADD}
         onClose={() => {
-          setModal(false);
+          setBottomSheet(BottomSheetState.NONE);
         }}
         target={date}
       />
@@ -163,84 +160,105 @@ const CalenderPage = () => {
 
 export default CalenderPage;
 
-const RecordModal: FC<{
-  visible: boolean;
+const RecordBottomSheet: FC<{
+  open: boolean;
   onClose: () => any;
   target: dayjs.Dayjs;
-}> = ({ visible, onClose, target }) => {
+}> = ({ open, onClose, target }) => {
   const [form] = Form.useForm();
-  useEffect(() => {
-    if (!visible && form) {
-      form.resetFields();
-    }
-    if (visible) {
-      const body = document.body;
-      disableBodyScroll(body);
-      return () => {
-        enableBodyScroll(body);
-      };
-    }
-  }, [visible]);
+
   return (
-    <Modal
-      title={`${target.format("M월 D일")} 내역 추가`}
-      visible={visible}
-      okText="저장"
-      onOk={() => {
-        form.submit();
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      onClosed={() => {
+        form.resetFields();
       }}
-      cancelText="취소"
-      onCancel={onClose}
     >
-      <Form
-        layout="horizontal"
-        form={form}
-        onFinish={async (form) => {
-          const value = Number(form.value);
-          if (Number.isNaN(value)) {
-            return message.error("반드시 숫자로 입력해주세요.");
-          }
-          try {
-            await db.records.add({
-              unix: target.unix(),
-              value,
-              description: form.description,
-              type: form.type ? "plus" : "minus",
-            });
-            onClose();
-            message.success("저장되었습니다.");
-          } catch (error) {
-            message.error("다시 시도해주세요.");
-          }
+      <div
+        style={{
+          height: "96vh",
+          padding: 20,
         }}
-        initialValues={{
-          type: false,
-        }}
-        requiredMark={false}
       >
-        <Form.Item label="종류" name="type">
-          <Switch
-            className="record-type"
-            checkedChildren="수입"
-            unCheckedChildren="지출"
-          />
-        </Form.Item>
-        <Form.Item
-          label="금액"
-          name="value"
-          rules={[{ required: true, message: "반드시 입력해주세요." }]}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
         >
-          <Input inputMode="numeric" addonAfter="원" />
-        </Form.Item>
-        <Form.Item
-          label="메모"
-          name="description"
-          rules={[{ required: true, message: "반드시 입력해주세요." }]}
+          <Button type="text" danger onClick={onClose}>
+            닫기
+          </Button>
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: 500,
+            }}
+          >
+            {target.format("M월 D일 내역 추가")}
+          </div>
+          <Button
+            type="text"
+            onClick={() => {
+              form.submit();
+            }}
+          >
+            저장
+          </Button>
+        </div>
+        <Form
+          layout="horizontal"
+          form={form}
+          onFinish={async (form) => {
+            const value = Number(form.value);
+            if (Number.isNaN(value)) {
+              return message.error("반드시 숫자로 입력해주세요.");
+            }
+            try {
+              await db.records.add({
+                unix: target.unix(),
+                value,
+                description: form.description,
+                type: form.type ? "plus" : "minus",
+              });
+              onClose();
+              message.success("저장되었습니다.");
+            } catch (error) {
+              message.error("다시 시도해주세요.");
+            }
+          }}
+          initialValues={{
+            type: false,
+          }}
+          requiredMark={false}
         >
-          <Input.TextArea />
-        </Form.Item>
-      </Form>
-    </Modal>
+          <Form.Item label="종류" name="type">
+            <Switch
+              className="record-type"
+              checkedChildren="수입"
+              unCheckedChildren="지출"
+            />
+          </Form.Item>
+          <Form.Item
+            label="금액"
+            name="value"
+            rules={[{ required: true, message: "반드시 입력해주세요." }]}
+          >
+            <Input inputMode="numeric" addonAfter="원" />
+          </Form.Item>
+          <Form.Item
+            label="메모"
+            name="description"
+            rules={[{ required: true, message: "반드시 입력해주세요." }]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+        </Form>
+      </div>
+    </BottomSheet>
   );
 };
 
