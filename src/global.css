@@ -60,6 +60,9 @@ div.top-navigation input[type="month"] {
   font-weight: 500;
 }
 
+.ant-switch.record-type[aria-checked="true"] {
+  background-color: #52c41a;
+}
 .ant-switch.record-type[aria-checked="false"] {
   background-color: #ff4d4f;
 }
