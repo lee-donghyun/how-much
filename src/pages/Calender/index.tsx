@@ -197,7 +197,7 @@ const RecordBottomSheet: FC<{
     >
       <div
         style={{
-          height: "96vh",
+          height: "88vh",
           padding: 20,
         }}
       >
