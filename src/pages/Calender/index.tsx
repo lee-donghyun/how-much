@@ -15,7 +15,7 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import Record from "../../components/Record";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
 import { enableBodyScroll, disableBodyScroll } from "body-scroll-lock";
 
 const CalenderPage = () => {
@@ -34,7 +34,7 @@ const CalenderPage = () => {
         content: "234",
       },
       {
-        type: "green",
+        type: "red",
         content: "q34q",
       },
       {
@@ -57,13 +57,14 @@ const CalenderPage = () => {
     <div>
       <div style={{ height: "calc(env(safe-area-inset-top) + 72px)" }}></div>
       <div className="top-navigation">
-        <label style={{ margin: 0 }}>
+        <label style={{ margin: 0, display: "flex", alignItems: "center" }}>
           <input
             type="month"
             name="month"
             value={date.format("YYYY-MM")}
             onChange={({ target: { value } }) => setDate(dayjs(value))}
           />
+          <DownOutlined style={{ marginLeft: "4px" }} />
         </label>
         <Button
           type="primary"
@@ -100,12 +101,12 @@ const CalenderPage = () => {
       >
         <List
           itemLayout="horizontal"
-          dataSource={[1, 2, 3, 4, 5]}
+          dataSource={["plus", "minus", "minus", "plus", "plus"] as "minus"[]}
           rowKey={(id) => id}
           renderItem={(item) => (
             <List.Item>
               <Record
-                mode="plus"
+                mode={item}
                 title={"7,000원"}
                 description={"떡볶이 먹음."}
               />
