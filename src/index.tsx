@@ -5,11 +5,15 @@ import App from "./App";
 import "antd/dist/antd.css";
 import "./global.css";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById("root")
-);
+if (new URLSearchParams(window.location.search).get("mode") == "pwa") {
+  ReactDOM.render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>,
+    document.getElementById("root")
+  );
+} else {
+  (document.getElementById("no-pwa") as HTMLDivElement).style.display = "block";
+}
