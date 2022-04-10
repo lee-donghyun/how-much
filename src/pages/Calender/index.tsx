@@ -56,8 +56,15 @@ const CalenderPage = () => {
     <div>
       <div className="top-navigation">
         <label>
-          <input type="month" name="month" style={{ display: "none" }} />
-          <Button>{date.format("YYYY년 M월 D일")}</Button>
+          <input
+            type="month"
+            name="month"
+            id="month"
+            style={{ display: "none" }}
+          />
+          <button type="button" value={"month"}>
+            {date.format("YYYY년 M월 D일")}
+          </button>
         </label>
         <Button
           type="primary"
