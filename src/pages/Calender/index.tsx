@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   List,
+  message,
   Modal,
   Popconfirm,
   Switch,
@@ -17,36 +18,41 @@ import dayjs from "dayjs";
 import Record from "../../components/Record";
 import { DeleteOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
 import { enableBodyScroll, disableBodyScroll } from "body-scroll-lock";
+import db from "../../services/api/db";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const CalenderPage = () => {
   const [date, setDate] = useState(dayjs());
   const [modal, setModal] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const records = useLiveQuery(
+    () =>
+      db.records
+        .where("unix")
+        .between(
+          date.clone().startOf("month").unix(),
+          date.clone().add(1, "month").startOf("month").unix()
+        )
+        .toArray(),
+    [date]
+  );
+
   const onSelect = (date: dayjs.Dayjs) => {
     setDate(date);
     listRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
   const dateCellRender = (value: dayjs.Dayjs) => {
-    const listData = [
-      {
-        type: "green",
-        content: "234",
-      },
-      {
-        type: "red",
-        content: "q34q",
-      },
-      {
-        type: "red",
-        content: "23w4",
-      },
-    ];
+    const listData =
+      records?.filter((record) =>
+        dayjs(record.unix * 1000).isSame(value, "date")
+      ) ?? [];
     return (
       <ul className="events">
         {listData.map((item) => (
-          <li key={item.content}>
-            <Badge color={item.type} />
+          <li key={item.id ?? ""}>
+            <Badge color={typeColor[item.type]} />
           </li>
         ))}
       </ul>
@@ -101,23 +107,38 @@ const CalenderPage = () => {
       >
         <List
           itemLayout="horizontal"
-          dataSource={["plus", "minus", "minus", "plus", "plus"] as "minus"[]}
-          rowKey={(id) => id}
-          renderItem={(item) => (
+          dataSource={
+            records?.filter((record) =>
+              dayjs(record.unix * 1000).isSame(date, "date")
+            ) ?? []
+          }
+          rowKey={(record) => record.id ?? ""}
+          renderItem={(record) => (
             <List.Item>
               <Record
-                mode={item}
-                title={"7,000원"}
-                description={"떡볶이 먹음."}
+                mode={record.type}
+                title={`${record.value.toLocaleString()}원`}
+                description={record.description}
               />
               <Popconfirm
-                title="떡볶이 먹음.을 삭제할까요?"
+                title={`${record.description}을 삭제할까요?`}
                 placement="left"
                 okText="삭제"
                 okButtonProps={{
                   danger: true,
                 }}
                 cancelText="취소"
+                onConfirm={async () => {
+                  try {
+                    if (!record.id) {
+                      throw new Error("");
+                    }
+                    await db.records.delete(record.id);
+                  } catch (error) {
+                    message.error("다시 시도해주세요.");
+                    console.error(error);
+                  }
+                }}
               >
                 <div role={"button"}>
                   <DeleteOutlined
@@ -174,8 +195,23 @@ const RecordModal: FC<{
       <Form
         layout="horizontal"
         form={form}
-        onFinish={(form) => {
-          console.log(form);
+        onFinish={async (form) => {
+          const value = Number(form.value);
+          if (Number.isNaN(value)) {
+            return message.error("반드시 숫자로 입력해주세요.");
+          }
+          try {
+            await db.records.add({
+              unix: target.unix(),
+              value,
+              description: form.description,
+              type: form.type ? "plus" : "minus",
+            });
+            onClose();
+            message.success("저장되었습니다.");
+          } catch (error) {
+            message.error("다시 시도해주세요.");
+          }
         }}
         initialValues={{
           type: false,
@@ -198,7 +234,7 @@ const RecordModal: FC<{
         </Form.Item>
         <Form.Item
           label="메모"
-          name="memo"
+          name="description"
           rules={[{ required: true, message: "반드시 입력해주세요." }]}
         >
           <Input.TextArea />
@@ -206,4 +242,9 @@ const RecordModal: FC<{
       </Form>
     </Modal>
   );
+};
+
+const typeColor = {
+  plus: "green",
+  minus: "red",
 };
