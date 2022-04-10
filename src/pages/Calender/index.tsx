@@ -14,7 +14,7 @@ import {
 import { FC, useRef, useState } from "react";
 import dayjs from "dayjs";
 import Record from "../../components/Record";
-import { DownOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
 import db, { Record as IRecord } from "../../services/api/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import BottomSheet from "../../components/BottomSheet";
@@ -43,17 +43,8 @@ const CalenderPage = () => {
 
   const onLongTouch = useLongTouch<HTMLDivElement>(
     async (_, record: IRecord) => {
-      if (window.confirm(`${record.description}을(를) 삭제할까요?`)) {
-        try {
-          if (!record.id) {
-            throw new Error("");
-          }
-          await db.records.delete(record.id);
-        } catch (error) {
-          message.error("다시 시도해주세요.");
-          console.error(error);
-        }
-      }
+      setTarget(record);
+      setBottomSheet(BottomSheetState.DELETE);
     }
   );
 
@@ -154,6 +145,35 @@ const CalenderPage = () => {
         }}
         target={date}
       />
+      <BottomSheet
+        open={bottomSheet == BottomSheetState.DELETE}
+        onClose={() => {
+          setBottomSheet(BottomSheetState.NONE);
+        }}
+        inset={40}
+      >
+        <div className="bottom-sheet-delete">
+          <div
+            className="option"
+            role={"button"}
+            onClick={async () => {
+              try {
+                if (!target?.id) {
+                  throw new Error("");
+                }
+                await db.records.delete(target.id);
+                setBottomSheet(BottomSheetState.NONE);
+              } catch (error) {
+                message.error("다시 시도해주세요.");
+                console.error(error);
+              }
+            }}
+          >
+            <DeleteOutlined />
+            <p>삭제</p>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 };
@@ -225,7 +245,6 @@ const RecordBottomSheet: FC<{
                 type: form.type ? "plus" : "minus",
               });
               onClose();
-              message.success("저장되었습니다.");
             } catch (error) {
               message.error("다시 시도해주세요.");
             }
