@@ -10,7 +10,7 @@ div.bottom-navigation {
   right: 0;
   bottom: 0;
   padding-top: 8px;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  padding-bottom: calc(env(safe-area-inset-bottom)+8px);
   background: #ffffff;
   display: flex;
   box-shadow: rgb(0 0 0 / 25%) 0px 2px 7px 0px;
@@ -31,11 +31,17 @@ div.top-navigation {
   position: sticky;
   top: 0;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   background: #ffffff;
   z-index: 10;
   box-shadow: rgb(234 234 234) 0px -1px 0px 0px inset;
   transition: all 1s;
+}
+
+div.top-navigation input[type="month"] {
+  border: 0;
+  font-size: 16px;
 }
 
 .ant-switch.record-type[aria-checked="false"] {

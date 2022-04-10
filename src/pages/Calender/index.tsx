@@ -6,7 +6,6 @@ import {
   Divider,
   Form,
   Input,
-  InputNumber,
   List,
   Modal,
   Popconfirm,
@@ -52,19 +51,18 @@ const CalenderPage = () => {
     );
   };
 
+  console.log(date.format("YYYY-MM-DD"));
+
   return (
     <div>
       <div className="top-navigation">
-        <label>
+        <label style={{ margin: 0 }}>
           <input
             type="month"
             name="month"
-            id="month"
-            style={{ display: "none" }}
+            value={date.format("YYYY-MM")}
+            onChange={({ target: { value } }) => setDate(dayjs(value))}
           />
-          <button type="button" value={"month"}>
-            {date.format("YYYY년 M월 D일")}
-          </button>
         </label>
         <Button
           type="primary"
@@ -77,6 +75,7 @@ const CalenderPage = () => {
       </div>
       <Calendar
         locale={koKr}
+        value={date}
         headerRender={() => <></>}
         dateCellRender={dateCellRender}
         onSelect={onSelect}
@@ -171,13 +170,7 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
           name="value"
           rules={[{ required: true, message: "반드시 입력해주세요." }]}
         >
-          <InputNumber
-            style={{ width: "100%" }}
-            formatter={(value) =>
-              `₩ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
-            parser={(value) => value?.replace(/\₩\s?|(,*)/g, "") ?? ""}
-          />
+          <Input />
         </Form.Item>
         <Form.Item
           label="메모"
