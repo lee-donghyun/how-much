@@ -5,7 +5,10 @@
 }
 input,
 input:before,
-input:after {
+input:after,
+textarea,
+textarea:before,
+textarea:after {
   -webkit-user-select: initial;
   -khtml-user-select: initial;
   -moz-user-select: initial;
@@ -52,8 +55,9 @@ div.top-navigation {
 
 div.top-navigation input[type="month"] {
   border: 0;
-  font-size: 16px;
+  font-size: 18px;
   background-color: white;
+  font-weight: 500;
 }
 
 .ant-switch.record-type[aria-checked="false"] {

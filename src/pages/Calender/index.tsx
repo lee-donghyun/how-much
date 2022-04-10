@@ -10,6 +10,7 @@ import {
   Modal,
   Popconfirm,
   Switch,
+  Typography,
 } from "antd";
 import { FC, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
@@ -81,6 +82,15 @@ const CalenderPage = () => {
         onSelect={onSelect}
       />
       <Divider />
+      <Typography.Title
+        level={4}
+        style={{
+          padding: "12px 20px 0",
+          margin: 0,
+        }}
+      >
+        {date.format("YYYY년 M월 D일")}
+      </Typography.Title>
       <div
         style={{
           padding: 20,
