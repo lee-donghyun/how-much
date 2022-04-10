@@ -55,7 +55,7 @@ const CalenderPage = () => {
 
   return (
     <div>
-      <div style={{ height: 72 }}></div>
+      <div style={{ height: "calc(env(safe-area-inset-top) + 72px)" }}></div>
       <div className="top-navigation">
         <label style={{ margin: 0 }}>
           <input
@@ -133,6 +133,7 @@ const CalenderPage = () => {
         onClose={() => {
           setModal(false);
         }}
+        target={date}
       />
     </div>
   );
@@ -140,10 +141,11 @@ const CalenderPage = () => {
 
 export default CalenderPage;
 
-const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
-  visible,
-  onClose,
-}) => {
+const RecordModal: FC<{
+  visible: boolean;
+  onClose: () => any;
+  target: dayjs.Dayjs;
+}> = ({ visible, onClose, target }) => {
   const [form] = Form.useForm();
   useEffect(() => {
     if (!visible && form) {
@@ -159,7 +161,7 @@ const RecordModal: FC<{ visible: boolean; onClose: () => any }> = ({
   }, [visible]);
   return (
     <Modal
-      title="내역 추가"
+      title={`${target.format("M월 D일")} 내역 추가`}
       visible={visible}
       okText="저장"
       onOk={() => {
