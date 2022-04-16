@@ -358,31 +358,38 @@ const SearchBottomSheet: FC<{
             }}
           />
         </div>
-        <List
-          itemLayout="horizontal"
-          dataSource={records}
-          rowKey={(record) => record.id ?? ""}
-          renderItem={(record) => {
-            const date = dayjs(record.unix * 1000);
-            return (
-              <List.Item
-                className="record"
-                onClick={() => {
-                  setDate(date);
-                  onClose();
-                }}
-              >
-                <Record
-                  mode={record.type}
-                  title={`${record.value.toLocaleString()}원`}
-                  description={`${record.description} - ${date.format(
-                    "YY/MM/DD"
-                  )}`}
-                />
-              </List.Item>
-            );
+        <div
+          style={{
+            height: "calc(100% - 124px)",
+            overflowY: "scroll",
           }}
-        />
+        >
+          <List
+            itemLayout="horizontal"
+            dataSource={records}
+            rowKey={(record) => record.id ?? ""}
+            renderItem={(record) => {
+              const date = dayjs(record.unix * 1000);
+              return (
+                <List.Item
+                  className="record"
+                  onClick={() => {
+                    setDate(date);
+                    onClose();
+                  }}
+                >
+                  <Record
+                    mode={record.type}
+                    title={`${record.value.toLocaleString()}원`}
+                    description={`${record.description} - ${date.format(
+                      "YY/MM/DD"
+                    )}`}
+                  />
+                </List.Item>
+              );
+            }}
+          />
+        </div>
       </div>
     </BottomSheet>
   );
