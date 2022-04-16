@@ -1,7 +1,6 @@
 import Calendar from "../../components/Calender";
 import koKr from "antd/lib/calendar/locale/ko_KR";
 import {
-  Badge,
   Button,
   Divider,
   Form,
@@ -11,14 +10,18 @@ import {
   Switch,
   Typography,
 } from "antd";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Record from "../../components/Record";
-import { DeleteOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  DownOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import db, { Record as IRecord } from "../../services/api/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import BottomSheet from "../../components/BottomSheet";
-import useLongTouch from "../../services/hooks/useLongClick";
 import { BottomSheetState } from "./helper";
 
 const CalenderPage = () => {
@@ -27,7 +30,6 @@ const CalenderPage = () => {
     BottomSheetState.NONE
   );
   const [target, setTarget] = useState<null | IRecord>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
   const records = useLiveQuery(
     () =>
@@ -39,13 +41,6 @@ const CalenderPage = () => {
         )
         .toArray(),
     [date]
-  );
-
-  const onLongTouch = useLongTouch<HTMLDivElement>(
-    async (_, record: IRecord) => {
-      setTarget(record);
-      setBottomSheet(BottomSheetState.DELETE);
-    }
   );
 
   const onSelect = (date: dayjs.Dayjs) => {
@@ -89,14 +84,23 @@ const CalenderPage = () => {
           />
           <DownOutlined style={{ marginLeft: "4px" }} />
         </label>
-        <Button
-          type="primary"
-          onClick={() => {
-            setBottomSheet(BottomSheetState.ADD);
-          }}
-        >
-          <PlusOutlined />
-        </Button>
+        <Button.Group>
+          <Button
+            onClick={() => {
+              setBottomSheet(BottomSheetState.SEARCH);
+            }}
+          >
+            <SearchOutlined />
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setBottomSheet(BottomSheetState.ADD);
+            }}
+          >
+            <PlusOutlined />
+          </Button>
+        </Button.Group>
       </div>
       <Calendar
         locale={koKr}
@@ -120,7 +124,6 @@ const CalenderPage = () => {
           paddingTop: 20,
           paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)",
         }}
-        ref={listRef}
       >
         <List
           itemLayout="horizontal"
@@ -153,6 +156,12 @@ const CalenderPage = () => {
           setBottomSheet(BottomSheetState.NONE);
         }}
         target={date}
+      />
+
+      <SearchBottomSheet
+        open={bottomSheet == BottomSheetState.SEARCH}
+        onClose={() => setBottomSheet(BottomSheetState.NONE)}
+        setDate={setDate}
       />
       <BottomSheet
         open={bottomSheet == BottomSheetState.DELETE}
@@ -285,6 +294,95 @@ const RecordBottomSheet: FC<{
             <Input.TextArea />
           </Form.Item>
         </Form>
+      </div>
+    </BottomSheet>
+  );
+};
+
+const SearchBottomSheet: FC<{
+  open: boolean;
+  onClose: () => any;
+  setDate: React.Dispatch<React.SetStateAction<dayjs.Dayjs>>;
+}> = ({ open, onClose, setDate }) => {
+  const [query, setQuery] = useState("");
+  const [records, setResult] = useState<IRecord[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      db.records
+        .filter((record) => record.description.includes(query))
+        .toArray()
+        .then((records) => {
+          setResult(records);
+        });
+    }
+  }, [open, query]);
+
+  return (
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      onClosed={() => {
+        setQuery("");
+      }}
+    >
+      <div style={{ height: "88vh" }}>
+        <div style={{ padding: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            <Button type="text" danger onClick={onClose}>
+              닫기
+            </Button>
+            <div
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+              }}
+            >
+              검색
+            </div>
+            <div style={{ width: 60 }}></div>
+          </div>
+          <Input
+            placeholder="메모로 검색하세요."
+            allowClear
+            value={query}
+            onChange={({ target: { value } }) => {
+              setQuery(value);
+            }}
+          />
+        </div>
+        <List
+          itemLayout="horizontal"
+          dataSource={records}
+          rowKey={(record) => record.id ?? ""}
+          renderItem={(record) => {
+            const date = dayjs(record.unix * 1000);
+            return (
+              <List.Item
+                className="record"
+                onClick={() => {
+                  setDate(date);
+                  onClose();
+                }}
+              >
+                <Record
+                  mode={record.type}
+                  title={`${record.value.toLocaleString()}원`}
+                  description={`${record.description} - ${date.format(
+                    "YY/MM/DD"
+                  )}`}
+                />
+              </List.Item>
+            );
+          }}
+        />
       </div>
     </BottomSheet>
   );
