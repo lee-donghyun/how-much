@@ -50,7 +50,6 @@ const CalenderPage = () => {
 
   const onSelect = (date: dayjs.Dayjs) => {
     setDate(date);
-    listRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const dateCellRender = (value: dayjs.Dayjs) => {
@@ -62,7 +61,15 @@ const CalenderPage = () => {
       <ul className="events">
         {listData.map((item) => (
           <li key={item.id ?? ""}>
-            <Badge color={typeColor[item.type]} />
+            <span
+              style={{
+                background: typeColor[item.type],
+                borderRadius: 99,
+                width: 4,
+                height: 4,
+                display: "block",
+              }}
+            ></span>
           </li>
         ))}
       </ul>
@@ -126,8 +133,10 @@ const CalenderPage = () => {
           renderItem={(record) => (
             <List.Item
               className="record"
-              onTouchStart={onLongTouch.onTouchStart}
-              onTouchEnd={(e) => onLongTouch.onTouchEnd(e, record)}
+              onClick={() => {
+                setTarget(record);
+                setBottomSheet(BottomSheetState.DELETE);
+              }}
             >
               <Record
                 mode={record.type}
@@ -282,6 +291,6 @@ const RecordBottomSheet: FC<{
 };
 
 const typeColor = {
-  plus: "green",
-  minus: "red",
+  plus: "#52c41a",
+  minus: "#ff4d4f",
 };

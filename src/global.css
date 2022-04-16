@@ -68,10 +68,11 @@ div.top-navigation input[type="month"] {
 }
 
 .ant-picker-cell .events {
-  margin: 0;
+  margin: 2px 0 0;
   padding: 0;
   list-style: none;
   display: flex;
+  gap: 4px;
   width: 100%;
   flex-wrap: wrap;
 }
@@ -87,6 +88,10 @@ div.top-navigation input[type="month"] {
 }
 .ant-list-item.record:hover {
   background-color: #f5f5f5;
+}
+
+.ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date-content {
+  height: 32px;
 }
 
 .bottom-sheet-delete {
