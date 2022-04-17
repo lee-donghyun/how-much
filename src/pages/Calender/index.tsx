@@ -309,12 +309,19 @@ const SearchBottomSheet: FC<{
 
   useEffect(() => {
     if (open) {
-      db.records
-        .filter((record) => record.description.includes(query))
-        .toArray()
-        .then((records) => {
-          setResult(records);
-        });
+      const timer = setTimeout(() => {
+        db.records
+          .filter((record) => record.description.includes(query))
+          .toArray()
+          .then((records) => {
+            if (records.length) {
+              setResult(records);
+            }
+          });
+      }, 200);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [open, query]);
 
