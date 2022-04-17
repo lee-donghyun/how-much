@@ -38,7 +38,17 @@ const BottomSheet: FC<{
   useEffect(() => {
     if (open) {
       const body = document.getElementById("root") as HTMLDivElement;
-      disableBodyScroll(body);
+      disableBodyScroll(body, {
+        allowTouchMove: (el: null | Element) => {
+          while (el && el !== body) {
+            if (el.classList.contains("body-scroll-lock-ignore")) {
+              return true;
+            }
+            el = el.parentElement;
+          }
+          return false;
+        },
+      });
       return () => {
         enableBodyScroll(body);
       };

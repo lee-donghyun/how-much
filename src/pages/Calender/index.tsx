@@ -373,6 +373,7 @@ const SearchBottomSheet: FC<{
         >
           <List
             itemLayout="horizontal"
+            className="body-scroll-lock-ignore"
             dataSource={records}
             rowKey={(record) => record.id ?? ""}
             renderItem={(record) => {
