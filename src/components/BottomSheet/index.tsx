@@ -37,7 +37,7 @@ const BottomSheet: FC<{
 
   useEffect(() => {
     if (open) {
-      const body = document.body;
+      const body = document.getElementById("root") as HTMLDivElement;
       disableBodyScroll(body);
       return () => {
         enableBodyScroll(body);
