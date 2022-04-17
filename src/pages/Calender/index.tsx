@@ -314,9 +314,7 @@ const SearchBottomSheet: FC<{
           .filter((record) => record.description.includes(query))
           .toArray()
           .then((records) => {
-            if (records.length) {
-              setResult(records);
-            }
+            setResult(records);
           });
       }, 200);
       return () => {
