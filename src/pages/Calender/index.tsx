@@ -16,6 +16,7 @@ import Record from "../../components/Record";
 import {
   DeleteOutlined,
   DownOutlined,
+  EditOutlined,
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -157,6 +158,13 @@ const CalenderPage = () => {
         }}
         target={date}
       />
+      <EditRecordBottomSheet
+        open={bottomSheet == BottomSheetState.EDIT && !!target}
+        onClose={() => {
+          setBottomSheet(BottomSheetState.NONE);
+        }}
+        target={target as IRecord}
+      />
 
       <SearchBottomSheet
         open={bottomSheet == BottomSheetState.SEARCH}
@@ -171,6 +179,24 @@ const CalenderPage = () => {
         inset={40}
       >
         <div className="bottom-sheet-delete">
+          <div
+            className="option"
+            role={"button"}
+            onClick={async () => {
+              try {
+                if (!target?.id) {
+                  throw new Error("");
+                }
+                setBottomSheet(BottomSheetState.EDIT);
+              } catch (error) {
+                message.error("다시 시도해주세요.");
+                console.error(error);
+              }
+            }}
+          >
+            <EditOutlined />
+            <p>수정</p>
+          </div>
           <div
             className="option"
             role={"button"}
@@ -273,6 +299,119 @@ const RecordBottomSheet: FC<{
           requiredMark={false}
         >
           <Form.Item label="종류" name="type">
+            <Switch
+              className="record-type"
+              checkedChildren="수입"
+              unCheckedChildren="지출"
+            />
+          </Form.Item>
+          <Form.Item
+            label="금액"
+            name="value"
+            rules={[{ required: true, message: "반드시 입력해주세요." }]}
+          >
+            <Input inputMode="numeric" addonAfter="원" />
+          </Form.Item>
+          <Form.Item
+            label="메모"
+            name="description"
+            rules={[{ required: true, message: "반드시 입력해주세요." }]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+        </Form>
+      </div>
+    </BottomSheet>
+  );
+};
+const EditRecordBottomSheet: FC<{
+  open: boolean;
+  onClose: () => any;
+  target: IRecord | null;
+}> = ({ open, onClose, target }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (open && target) {
+      form.setFieldsValue({
+        type: { plus: true, minus: false }[target.type],
+        value: target.value,
+        description: target.description,
+      });
+    }
+  }, [open]);
+
+  return (
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      onClosed={() => {
+        form.resetFields();
+      }}
+    >
+      <div
+        style={{
+          height: "88vh",
+          padding: 20,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <Button type="text" danger onClick={onClose}>
+            닫기
+          </Button>
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: 500,
+            }}
+          >
+            {dayjs((target?.unix ?? 0) * 1000).format("M월 D일 내역 수정")}
+          </div>
+          <Button
+            type="text"
+            onClick={() => {
+              form.submit();
+            }}
+          >
+            저장
+          </Button>
+        </div>
+        <Form
+          layout="horizontal"
+          form={form}
+          onFinish={async (form) => {
+            const value = Number(form.value);
+            if (Number.isNaN(value)) {
+              return message.error("반드시 숫자로 입력해주세요.");
+            }
+            console.log(target);
+
+            try {
+              await db.records.put({
+                id: target?.id,
+                unix: target?.unix ?? 0,
+                value,
+                description: form.description,
+                type: form.type ? "plus" : "minus",
+              });
+              onClose();
+            } catch (error) {
+              message.error("다시 시도해주세요.");
+            }
+          }}
+          initialValues={{
+            type: false,
+          }}
+          requiredMark={false}
+        >
+          <Form.Item label="종류" name="type" valuePropName="checked">
             <Switch
               className="record-type"
               checkedChildren="수입"

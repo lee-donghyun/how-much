@@ -3,4 +3,5 @@ export enum BottomSheetState {
   DELETE,
   ADD,
   SEARCH,
+  EDIT,
 }
