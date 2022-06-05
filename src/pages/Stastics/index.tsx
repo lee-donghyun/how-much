@@ -1,4 +1,8 @@
-import { DownOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  MoneyCollectOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 import {
   Statistic,
   Button,
@@ -12,14 +16,23 @@ import {
 import dayjs from "dayjs";
 import { useLiveQuery } from "dexie-react-hooks";
 import { FC, useState } from "react";
+import BottomSheet from "../../components/BottomSheet";
 import Record from "../../components/Record";
 import db from "../../services/api/db";
-import { FILTER, SORT } from "./helper";
+import {
+  BottomSheetState,
+  FILTER,
+  filterOptions,
+  SORT,
+  sortOptions,
+} from "./helper";
 
 const StasticsPage: FC = () => {
   const [date, setDate] = useState(dayjs());
   const [filter, setFilter] = useState<FILTER>(FILTER.ALL);
   const [sort, setSort] = useState<SORT>(SORT.UNIX);
+
+  const [bottomSheet, setBottomSheet] = useState(BottomSheetState.NONE);
 
   const records = useLiveQuery(
     () =>
@@ -112,17 +125,19 @@ const StasticsPage: FC = () => {
         <Radio.Group
           value={filter}
           onChange={({ target: { value } }) => setFilter(value)}
-        >
-          <Radio.Button value={FILTER.ALL}>전체</Radio.Button>
-          <Radio.Button value={FILTER.PLUS}>수입</Radio.Button>
-          <Radio.Button value={FILTER.MINUS}>지출</Radio.Button>
-        </Radio.Group>
-        <Select style={{ width: 120 }} value={sort} onChange={setSort}>
-          <Select.Option value={SORT.VALUE_DESC}>금액 높은 순</Select.Option>
-          <Select.Option value={SORT.VALUE}>금액 낮은 순</Select.Option>
-          <Select.Option value={SORT.UNIX_DESC}>최신 순</Select.Option>
-          <Select.Option value={SORT.UNIX}>오래된 순</Select.Option>
-        </Select>
+          options={filterOptions}
+          optionType="button"
+        />
+        <Select
+          style={{ width: 120 }}
+          value={sort}
+          onChange={setSort}
+          open={false}
+          onClick={() => {
+            setBottomSheet(BottomSheetState.SORT);
+          }}
+          options={sortOptions}
+        />
       </Row>
       <div
         style={{
@@ -164,6 +179,29 @@ const StasticsPage: FC = () => {
           }}
         />
       </div>
+      <BottomSheet
+        open={bottomSheet == BottomSheetState.SORT}
+        onClose={() => {
+          setBottomSheet(BottomSheetState.NONE);
+        }}
+        inset={40}
+      >
+        <div className="bottom-sheet-delete">
+          {sortOptions.map((option) => (
+            <div
+              className="option"
+              key={option.value}
+              role={"button"}
+              onClick={() => {
+                setSort(option.value);
+                setBottomSheet(BottomSheetState.NONE);
+              }}
+            >
+              <p>{option.label}</p>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
     </div>
   );
 };
