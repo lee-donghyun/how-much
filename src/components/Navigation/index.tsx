@@ -1,13 +1,16 @@
 import { CalendarOutlined, LineChartOutlined } from "@ant-design/icons";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
   return (
     <div>
       <Outlet />
       <div className="bottom-navigation">
         <button
+          className={pathname == "/" ? "active" : ""}
           onClick={() => {
             navigate("/", { replace: true });
           }}
@@ -16,6 +19,7 @@ const Navigation = () => {
           <p>캘린더</p>
         </button>
         <button
+          className={pathname == "/stastics" ? "active" : ""}
           onClick={() => {
             navigate("/stastics", { replace: true });
           }}

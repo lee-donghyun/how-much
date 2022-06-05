@@ -32,6 +32,11 @@ div.bottom-navigation button {
   border: none;
   width: 100%;
   padding: 0;
+  color: rgb(0 0 0 / 25%);
+  transition: all 0.1s;
+}
+div.bottom-navigation button.active {
+  color: black;
 }
 div.bottom-navigation p {
   font-size: 12px;
