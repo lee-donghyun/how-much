@@ -114,6 +114,7 @@ const StasticsPage: FC = () => {
       <Divider style={{ marginBottom: 0 }} />
       <Row
         justify="space-between"
+        align="middle"
         style={{
           padding: "24px 20px",
           position: "sticky",

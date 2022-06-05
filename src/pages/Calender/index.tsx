@@ -298,7 +298,7 @@ const RecordBottomSheet: FC<{
           }}
           requiredMark={false}
         >
-          <Form.Item label="종류" name="type">
+          <Form.Item label="종류" name="type" valuePropName="checked">
             <Switch
               className="record-type"
               checkedChildren="수입"
